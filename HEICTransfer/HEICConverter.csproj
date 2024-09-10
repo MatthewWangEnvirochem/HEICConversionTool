@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ApplicationIcon>ENVOLV.ico</ApplicationIcon>
+    <Company>Envirochem Services Inc.</Company>
+    <PackageIcon>apple.png</PackageIcon>
+    <PackageIconUrl />
+    <SignAssembly>true</SignAssembly>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Magick.NET-Q16-AnyCPU" Version="13.5.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="D:\Kitty\Photos\icon\apple.png">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
+  </ItemGroup>
+
+</Project>
