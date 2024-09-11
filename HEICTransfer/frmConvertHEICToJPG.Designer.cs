@@ -33,16 +33,15 @@ namespace HEICTransfer
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmConvertHEICToJPG));
             folderBrowserDialog = new System.Windows.Forms.FolderBrowserDialog();
-            btnOpenFolder = new System.Windows.Forms.Button();
+            btnSelectInputFolder = new System.Windows.Forms.Button();
             listBox1 = new System.Windows.Forms.ListBox();
-            txtOriginalSelectedPath = new System.Windows.Forms.TextBox();
+            txtSelectedInputPath = new System.Windows.Forms.TextBox();
             groupBox1 = new System.Windows.Forms.GroupBox();
             btnConvert = new System.Windows.Forms.Button();
-            folderBrowserDialog1 = new System.Windows.Forms.FolderBrowserDialog();
             progressBar = new System.Windows.Forms.ProgressBar();
-            btnSelectTargetFolder = new System.Windows.Forms.Button();
-            btnOpenTargetFolder = new System.Windows.Forms.Button();
-            txtTargetSelectedPath = new System.Windows.Forms.TextBox();
+            btnSelectOutputFolder = new System.Windows.Forms.Button();
+            btnOpenOutputFolder = new System.Windows.Forms.Button();
+            txtSelectedOutputPath = new System.Windows.Forms.TextBox();
             btnTrim = new System.Windows.Forms.Button();
             btnTrimConvert = new System.Windows.Forms.Button();
             btnSavedValues = new System.Windows.Forms.Button();
@@ -50,16 +49,16 @@ namespace HEICTransfer
             groupBox1.SuspendLayout();
             SuspendLayout();
             // 
-            // btnOpenFolder
+            // btnSelectInputFolder
             // 
-            btnOpenFolder.Location = new System.Drawing.Point(10, 29);
-            btnOpenFolder.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            btnOpenFolder.Name = "btnOpenFolder";
-            btnOpenFolder.Size = new System.Drawing.Size(880, 31);
-            btnOpenFolder.TabIndex = 0;
-            btnOpenFolder.Text = "Select Original folder";
-            btnOpenFolder.UseVisualStyleBackColor = true;
-            btnOpenFolder.Click += btnOpenFolder_Click;
+            btnSelectInputFolder.Location = new System.Drawing.Point(10, 29);
+            btnSelectInputFolder.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            btnSelectInputFolder.Name = "btnOpenFolder";
+            btnSelectInputFolder.Size = new System.Drawing.Size(880, 31);
+            btnSelectInputFolder.TabIndex = 0;
+            btnSelectInputFolder.Text = "Select Original folder";
+            btnSelectInputFolder.UseVisualStyleBackColor = true;
+            btnSelectInputFolder.Click += btnSelectInputFolder_Click;
             // 
             // listBox1
             // 
@@ -71,20 +70,20 @@ namespace HEICTransfer
             listBox1.Size = new System.Drawing.Size(883, 204);
             listBox1.TabIndex = 2;
             // 
-            // txtOriginalSelectedPath
+            // txtSelectedInputPath
             // 
-            txtOriginalSelectedPath.Location = new System.Drawing.Point(7, 68);
-            txtOriginalSelectedPath.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            txtOriginalSelectedPath.Name = "txtOriginalSelectedPath";
-            txtOriginalSelectedPath.ReadOnly = true;
-            txtOriginalSelectedPath.Size = new System.Drawing.Size(883, 27);
-            txtOriginalSelectedPath.TabIndex = 4;
+            txtSelectedInputPath.Location = new System.Drawing.Point(7, 68);
+            txtSelectedInputPath.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            txtSelectedInputPath.Name = "txtOriginalSelectedPath";
+            txtSelectedInputPath.ReadOnly = true;
+            txtSelectedInputPath.Size = new System.Drawing.Size(883, 27);
+            txtSelectedInputPath.TabIndex = 4;
             // 
             // groupBox1
             // 
-            groupBox1.Controls.Add(txtOriginalSelectedPath);
+            groupBox1.Controls.Add(txtSelectedInputPath);
             groupBox1.Controls.Add(listBox1);
-            groupBox1.Controls.Add(btnOpenFolder);
+            groupBox1.Controls.Add(btnSelectInputFolder);
             groupBox1.Location = new System.Drawing.Point(3, 16);
             groupBox1.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             groupBox1.Name = "groupBox1";
@@ -114,36 +113,36 @@ namespace HEICTransfer
             progressBar.Size = new System.Drawing.Size(877, 31);
             progressBar.TabIndex = 8;
             // 
-            // btnSelectTargetFolder
+            // btnSelectOutputFolder
             // 
-            btnSelectTargetFolder.Location = new System.Drawing.Point(14, 497);
-            btnSelectTargetFolder.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            btnSelectTargetFolder.Name = "btnSelectTargetFolder";
-            btnSelectTargetFolder.Size = new System.Drawing.Size(440, 31);
-            btnSelectTargetFolder.TabIndex = 9;
-            btnSelectTargetFolder.Text = "Select Target folder";
-            btnSelectTargetFolder.UseVisualStyleBackColor = true;
-            btnSelectTargetFolder.Click += btnSelectTargetFolder_Click;
+            btnSelectOutputFolder.Location = new System.Drawing.Point(14, 497);
+            btnSelectOutputFolder.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            btnSelectOutputFolder.Name = "btnSelectTargetFolder";
+            btnSelectOutputFolder.Size = new System.Drawing.Size(440, 31);
+            btnSelectOutputFolder.TabIndex = 9;
+            btnSelectOutputFolder.Text = "Select Target folder";
+            btnSelectOutputFolder.UseVisualStyleBackColor = true;
+            btnSelectOutputFolder.Click += btnSelectOutputFolder_Click;
             // 
-            // btnOpenTargetFolder
+            // btnOpenOutputFolder
             // 
-            btnOpenTargetFolder.Location = new System.Drawing.Point(454, 497);
-            btnOpenTargetFolder.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            btnOpenTargetFolder.Name = "btnOpenTargetFolder";
-            btnOpenTargetFolder.Size = new System.Drawing.Size(440, 31);
-            btnOpenTargetFolder.TabIndex = 9;
-            btnOpenTargetFolder.Text = "Open Target folder";
-            btnOpenTargetFolder.UseVisualStyleBackColor = true;
-            btnOpenTargetFolder.Click += btnOpenTargetFolder_Click;
+            btnOpenOutputFolder.Location = new System.Drawing.Point(454, 497);
+            btnOpenOutputFolder.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            btnOpenOutputFolder.Name = "btnOpenTargetFolder";
+            btnOpenOutputFolder.Size = new System.Drawing.Size(440, 31);
+            btnOpenOutputFolder.TabIndex = 9;
+            btnOpenOutputFolder.Text = "Open Target folder";
+            btnOpenOutputFolder.UseVisualStyleBackColor = true;
+            btnOpenOutputFolder.Click += btnOpenOutputFolder_Click;
             // 
-            // txtTargetSelectedPath
+            // txtSelectedOutputPath
             // 
-            txtTargetSelectedPath.Location = new System.Drawing.Point(14, 536);
-            txtTargetSelectedPath.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
-            txtTargetSelectedPath.Name = "txtTargetSelectedPath";
-            txtTargetSelectedPath.ReadOnly = true;
-            txtTargetSelectedPath.Size = new System.Drawing.Size(876, 27);
-            txtTargetSelectedPath.TabIndex = 10;
+            txtSelectedOutputPath.Location = new System.Drawing.Point(14, 536);
+            txtSelectedOutputPath.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            txtSelectedOutputPath.Name = "txtTargetSelectedPath";
+            txtSelectedOutputPath.ReadOnly = true;
+            txtSelectedOutputPath.Size = new System.Drawing.Size(876, 27);
+            txtSelectedOutputPath.TabIndex = 10;
             // 
             // btnTrim
             // 
@@ -200,9 +199,9 @@ namespace HEICTransfer
             AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             ClientSize = new System.Drawing.Size(914, 583);
             Controls.Add(btnTrim);
-            Controls.Add(txtTargetSelectedPath);
-            Controls.Add(btnSelectTargetFolder);
-            Controls.Add(btnOpenTargetFolder);
+            Controls.Add(txtSelectedOutputPath);
+            Controls.Add(btnSelectOutputFolder);
+            Controls.Add(btnOpenOutputFolder);
             Controls.Add(progressBar);
             Controls.Add(btnConvert);
             Controls.Add(btnTrimConvert);
@@ -222,16 +221,15 @@ namespace HEICTransfer
 
         #endregion
         private System.Windows.Forms.FolderBrowserDialog folderBrowserDialog;
-        private System.Windows.Forms.Button btnOpenFolder;
+        private System.Windows.Forms.Button btnSelectInputFolder;
         private System.Windows.Forms.ListBox listBox1;
-        private System.Windows.Forms.TextBox txtOriginalSelectedPath;
+        private System.Windows.Forms.TextBox txtSelectedInputPath;
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.Button btnConvert;
-        private System.Windows.Forms.FolderBrowserDialog folderBrowserDialog1;
         private System.Windows.Forms.ProgressBar progressBar;
-        private System.Windows.Forms.Button btnSelectTargetFolder;
-        private System.Windows.Forms.Button btnOpenTargetFolder;
-        private System.Windows.Forms.TextBox txtTargetSelectedPath;
+        private System.Windows.Forms.Button btnSelectOutputFolder;
+        private System.Windows.Forms.Button btnOpenOutputFolder;
+        private System.Windows.Forms.TextBox txtSelectedOutputPath;
         private System.Windows.Forms.Button btnTrim;
         private System.Windows.Forms.Button btnTrimConvert;
         private System.Windows.Forms.Button btnSavedValues;

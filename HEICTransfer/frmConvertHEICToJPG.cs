@@ -35,27 +35,23 @@ namespace HEICTransfer
 
             }
             InitializeComponent();
-            loadSettings();
         }
 
-        //string foldername;
-        string sourceFolder = "";
-        string destinationFolder = "";
-        string defaultSource = "";
-        string defaultDestination = "";
+        string inputFolder = "";
+        string outputFolder = "";
+        string defaultInput = "";
+        string defaultOutput = "";
         int defaultX = 800;
         int defaultY = 600;
         Boolean useDefaults = true;
         string savePath = Path.Combine(Application.StartupPath, "defaults.json");
 
-        private void btnOpenFolder_Click(object sender, EventArgs e)
+        private void btnSelectInputFolder_Click(object sender, EventArgs e)
         {
             if (!useDefaults)
             {
                 try
                 {
-                    this.folderBrowserDialog.RootFolder = System.Environment.SpecialFolder.MyComputer;
-                    this.folderBrowserDialog.ShowNewFolderButton = false;
                     DialogResult result = this.folderBrowserDialog.ShowDialog();
                     if (result == DialogResult.OK)
                     {
@@ -65,13 +61,12 @@ namespace HEICTransfer
                         string foldername = this.folderBrowserDialog.SelectedPath;
 
                         // print the folder name on a label
-                        this.txtOriginalSelectedPath.Text = foldername;
+                        this.txtSelectedInputPath.Text = foldername;
 
 
                         // iterate over all files in the selected folder and add them to 
                         // the listbox.
-                        foreach (string filename in Directory.GetFiles(foldername))
-                            this.listBox1.Items.Add(filename);
+                        this.listFiles(foldername);
                     }
                 }
                 catch (Exception ex)
@@ -85,28 +80,18 @@ namespace HEICTransfer
             this.listBox1.Items.Clear();
         }
 
-        private void btnSelectTargetFolder_Click(object sender, EventArgs e)
+        private void btnSelectOutputFolder_Click(object sender, EventArgs e)
         {
             if (!useDefaults)
             {
-                this.folderBrowserDialog1.RootFolder = System.Environment.SpecialFolder.MyComputer;
-                this.folderBrowserDialog1.ShowNewFolderButton = false;
-                DialogResult result = this.folderBrowserDialog1.ShowDialog();
+                DialogResult result = this.folderBrowserDialog.ShowDialog();
                 if (result == DialogResult.OK)
                 {
-                    // this.clearListBox();
-
                     // retrieve the name of the selected folder
-                    string foldername = this.folderBrowserDialog1.SelectedPath;
+                    string foldername = this.folderBrowserDialog.SelectedPath;
 
                     // print the folder name on a label
-                    this.txtTargetSelectedPath.Text = foldername;
-
-
-                    // iterate over all files in the selected folder and add them to 
-                    // the listbox.
-                    //foreach (string filename in Directory.GetFiles(foldername))
-                    //	this.listBox1.Items.Add(filename);
+                    this.txtSelectedOutputPath.Text = foldername;
                 }
             }
             
@@ -117,34 +102,9 @@ namespace HEICTransfer
             await convertFiles();
         }
 
-        //private void ConvertHEICToJPG(string sourceFolder, string destinationFolder)
-        //{
-        //    var heicFiles = Directory.GetFiles(sourceFolder, "*.heic");
-
-        //    foreach (var heicFile in heicFiles)
-        //    {
-        //        string jpgFileName = Path.ChangeExtension(Path.GetFileName(heicFile), ".jpg");
-        //        string jpgFilePath = Path.Combine(destinationFolder, jpgFileName);
-
-        //        try
-        //        {
-        //            using (var image = new MagickImage(heicFile))
-        //            {
-        //                image.Write(jpgFilePath);
-        //            }
-        //        }
-        //        catch (Exception ex)
-        //        {
-        //            // Log or handle the exception
-        //            Console.WriteLine($"Error processing {heicFile}: {ex.Message}");
-        //            // You can choose to skip this file or take other appropriate actions.
-        //        }
-        //    }
-        //}
-
-        private async Task ConvertHEICToJPGAsync(string sourceFolder, string destinationFolder)
+        private async Task ConvertHEICToJPGAsync(string inputFolder, string outputFolder)
         {
-            var heicFiles = Directory.GetFiles(sourceFolder, "*.heic");
+            var heicFiles = Directory.GetFiles(inputFolder, "*.heic");
 
             progressBar.Maximum = heicFiles.Length;
             progressBar.Value = 0;
@@ -152,7 +112,7 @@ namespace HEICTransfer
             foreach (var heicFile in heicFiles)
             {
                 string jpgFileName = Path.ChangeExtension(Path.GetFileName(heicFile), ".jpg");
-                string jpgFilePath = Path.Combine(destinationFolder, jpgFileName);
+                string jpgFilePath = Path.Combine(outputFolder, jpgFileName);
 
                 try
                 {
@@ -177,12 +137,12 @@ namespace HEICTransfer
             }
         }
 
-        private void btnOpenTargetFolder_Click(object sender, EventArgs e)
+        private void btnOpenOutputFolder_Click(object sender, EventArgs e)
         {
-            destinationFolder = txtTargetSelectedPath.Text;
-            if (Directory.Exists(destinationFolder))
+            outputFolder = txtSelectedOutputPath.Text;
+            if (Directory.Exists(outputFolder))
             {
-                Process.Start("explorer.exe", destinationFolder);
+                Process.Start("explorer.exe", outputFolder);
             }
             else
             {
@@ -192,88 +152,35 @@ namespace HEICTransfer
 
         private void btnTrim_Click(object sender, EventArgs e)
         {
-            int x = -1;
-            int y = -1;
-            string tempOrigin;
-            string tempTarget;
-            if (useDefaults)
-            {
-                tempOrigin = txtOriginalSelectedPath.Text;
-                tempTarget = txtTargetSelectedPath.Text;
-                txtOriginalSelectedPath.Text = tempTarget;
-                txtTargetSelectedPath.Text = "";
-                TrimFiles(txtOriginalSelectedPath.Text, txtTargetSelectedPath.Text, defaultX, defaultY);
-                txtOriginalSelectedPath.Text = tempOrigin;
-                txtTargetSelectedPath.Text = tempTarget;
-            } else
-            {
-                if (TrimBox("Trim", "Enter desired size", ref x, ref y) == DialogResult.OK)
-                {
-                    tempOrigin = txtOriginalSelectedPath.Text;
-                    tempTarget = txtTargetSelectedPath.Text;
-                    txtOriginalSelectedPath.Text = tempTarget;
-                    txtTargetSelectedPath.Text = "";
-                    TrimFiles(txtOriginalSelectedPath.Text, txtTargetSelectedPath.Text, x, y);
-                    txtOriginalSelectedPath.Text = tempOrigin;
-                    txtTargetSelectedPath.Text = tempTarget;
-                }
-            }
-            
+            trim();
         }
 
         private async void btnTrimConvert_Click(object sender, EventArgs e)
         {
-
-            int x = -1;
-            int y = -1;
-            string tempOrigin;
-            string tempTarget;
             await convertFiles();
-            if (useDefaults)
-            {
-                tempOrigin = txtOriginalSelectedPath.Text;
-                tempTarget = txtTargetSelectedPath.Text;
-                txtOriginalSelectedPath.Text = tempTarget;
-                txtTargetSelectedPath.Text = "";
-                TrimFiles(txtOriginalSelectedPath.Text, txtTargetSelectedPath.Text, defaultX, defaultY);
-                txtOriginalSelectedPath.Text = tempOrigin;
-                txtTargetSelectedPath.Text = tempTarget;
-            }
-            else
-            {
-                if (TrimBox("Convert and Trim", "Enter desired size", ref x, ref y) == DialogResult.OK)
-                {
-                    tempOrigin = txtOriginalSelectedPath.Text;
-                    tempTarget = txtTargetSelectedPath.Text;
-                    txtOriginalSelectedPath.Text = tempTarget;
-                    txtTargetSelectedPath.Text = "";
-                    TrimFiles(txtOriginalSelectedPath.Text, txtTargetSelectedPath.Text, x, y);
-                    txtOriginalSelectedPath.Text = tempOrigin;
-                    txtTargetSelectedPath.Text = tempTarget;
-                }
-            }
+            trim();
         }
 
-        private void TrimFiles(string sourceFolder, string destinationFolder, int x, int y)
+        private void TrimFiles(string inputFolder, string outputFolder, int x, int y)
         {
             try
             {
-                if (txtOriginalSelectedPath.Text.Length != 0)
+                if (txtSelectedInputPath.Text.Length != 0)
                 {
-                    destinationFolder = Path.Combine(sourceFolder, "Trimmed");
-                    txtTargetSelectedPath.Text = destinationFolder;
+                    outputFolder = Path.Combine(inputFolder, "Trimmed");
+                    txtSelectedOutputPath.Text = outputFolder;
 
-                    if (!Directory.Exists(destinationFolder))
+                    if (!Directory.Exists(outputFolder))
                     {
-                        Directory.CreateDirectory(destinationFolder);
+                        Directory.CreateDirectory(outputFolder);
                     }
 
                     // Get all jpg files in the source folder
-                    string[] files = Directory.GetFiles(sourceFolder, "*.jpg");
+                    string[] files = Directory.GetFiles(inputFolder, "*.jpg");
                     foreach (string file in files)
                     {
                         string filename = x.ToString() + "x" + y.ToString() + Path.GetFileName(file);
-                        string destPath = Path.Combine(destinationFolder, filename);
+                        string destPath = Path.Combine(outputFolder, filename);
 
                         // Resize each image and save it to the destination folder
                         ResizeImage(file, destPath, x, y);
@@ -285,22 +192,21 @@ namespace HEICTransfer
 
                 else
                 {
-
                     if (folderBrowserDialog.ShowDialog() == DialogResult.OK)
                     {
-                        sourceFolder = folderBrowserDialog.SelectedPath;
-                        destinationFolder = Path.Combine(sourceFolder, "Trimmed");
-                        txtTargetSelectedPath.Text = destinationFolder;
+                        inputFolder = folderBrowserDialog.SelectedPath;
+                        outputFolder = Path.Combine(inputFolder, "Trimmed");
+                        txtSelectedOutputPath.Text = outputFolder;
 
-                        if (!Directory.Exists(destinationFolder))
-                            Directory.CreateDirectory(destinationFolder);
+                        if (!Directory.Exists(outputFolder))
+                            Directory.CreateDirectory(outputFolder);
 
                         // Get all jpg files in the source folder
-                        string[] files = Directory.GetFiles(sourceFolder, "*.jpg");
+                        string[] files = Directory.GetFiles(inputFolder, "*.jpg");
                         foreach (string file in files)
                         {
                             string filename = x.ToString() + "x" + y.ToString() + Path.GetFileName(file);
-                            string destPath = Path.Combine(destinationFolder, filename);
+                            string destPath = Path.Combine(outputFolder, filename);
 
                             // Resize each image and save it to the destination folder
                             ResizeImage(file, destPath, x, y);
@@ -320,20 +226,19 @@ namespace HEICTransfer
         {
             try
             {
-                if (txtOriginalSelectedPath.Text.Length != 0)
+                if (txtSelectedInputPath.Text.Length != 0)
                 {
-                    sourceFolder = txtOriginalSelectedPath.Text;
-                    destinationFolder = txtTargetSelectedPath.Text;
-                    if (!Directory.Exists(destinationFolder))
+                    inputFolder = txtSelectedInputPath.Text;
+                    outputFolder = txtSelectedOutputPath.Text;
+                    if (!Directory.Exists(outputFolder))
                     {
-                        destinationFolder = Path.Combine(txtOriginalSelectedPath.Text, "Converted");
-                        txtTargetSelectedPath.Text = destinationFolder;
-                        Directory.CreateDirectory(destinationFolder);
+                        outputFolder = Path.Combine(txtSelectedInputPath.Text, "Converted");
+                        txtSelectedOutputPath.Text = outputFolder;
+                        Directory.CreateDirectory(outputFolder);
                     }
 
-
                     //ConvertHEICToJPG(sourceFolder, destinationFolder);
-                    await ConvertHEICToJPGAsync(sourceFolder, destinationFolder);
+                    await ConvertHEICToJPGAsync(inputFolder, outputFolder);
 
                     MessageBox.Show("Conversion complete!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
@@ -343,18 +248,18 @@ namespace HEICTransfer
 
                     if (folderBrowserDialog.ShowDialog() == DialogResult.OK)
                     {
-                        sourceFolder = folderBrowserDialog.SelectedPath;
-                        txtOriginalSelectedPath.Text = folderBrowserDialog.SelectedPath;
-                        destinationFolder = txtTargetSelectedPath.Text;
-                        if (!Directory.Exists(destinationFolder))
+                        inputFolder = folderBrowserDialog.SelectedPath;
+                        txtSelectedInputPath.Text = folderBrowserDialog.SelectedPath;
+                        outputFolder = txtSelectedOutputPath.Text;
+                        if (!Directory.Exists(outputFolder))
                         {
-                            destinationFolder = Path.Combine(sourceFolder, "Converted");
-                            txtTargetSelectedPath.Text = destinationFolder;
-                            Directory.CreateDirectory(destinationFolder);
+                            outputFolder = Path.Combine(inputFolder, "Converted");
+                            txtSelectedOutputPath.Text = outputFolder;
+                            Directory.CreateDirectory(outputFolder);
                         }
 
                         //ConvertHEICToJPG(sourceFolder, destinationFolder);
-                        await ConvertHEICToJPGAsync(sourceFolder, destinationFolder);
+                        await ConvertHEICToJPGAsync(inputFolder, outputFolder);
 
                         MessageBox.Show("Conversion complete!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
@@ -446,131 +351,56 @@ namespace HEICTransfer
         {
             int x = 1;
             int y = 1;
-            string origin = "";
-            string target = "";
+            string input = "";
+            string output = "";
             
             string data = File.ReadAllText(savePath);
 
             if (data != "" && data != "{}")
             {
                 SaveData loadedData = JsonConvert.DeserializeObject<SaveData>(data);
-                origin = loadedData.inputFolder;
-                target = loadedData.outputFolder;
+                input = loadedData.inputFolder;
+                output = loadedData.outputFolder;
                 x = loadedData.x;
                 y = loadedData.y;
 
-                defaultSource = loadedData.inputFolder;
-                defaultDestination = loadedData.outputFolder;
+                defaultInput = loadedData.inputFolder;
+                defaultOutput = loadedData.outputFolder;
                 defaultX = loadedData.x;
                 defaultY = loadedData.y;
             }
 
-            if (savedValues(ref x, ref y, ref origin, ref target) == DialogResult.OK)
+            if (savedValues(ref x, ref y, ref input, ref output) == DialogResult.OK)
             {
-                SaveData saveData = new SaveData(origin, target, x, y);
-                defaultSource = saveData.inputFolder;
-                defaultDestination = saveData.outputFolder;
+                SaveData saveData = new SaveData(input, output, x, y);
+                defaultInput = saveData.inputFolder;
+                defaultOutput = saveData.outputFolder;
                 defaultX = saveData.x;
                 defaultY = saveData.y;
                 string toWrite = JsonConvert.SerializeObject(saveData);
-                Debug.WriteLine(toWrite);
                 File.WriteAllText(savePath, toWrite);
+                if (useDefaults)
+                {
+                    loadSettings();
+                }
             }
         }
-        public static DialogResult savedValues(ref int x, ref int y, ref string origin, ref string target)
+        public static DialogResult savedValues(ref int x, ref int y, ref string input, ref string output)
         {
-            Form menu = new Form();
-            menu.Text = "Default Values";
-
-            TextBox savedXValue = new TextBox();
-            TextBox savedYValue = new TextBox();
-            TextBox savedOrigin = new TextBox();
-            savedOrigin.Text = origin;
-            TextBox savedTarget = new TextBox();
-            savedTarget.Text = target;
-
-            Label xCrossValue = new Label();
-
-            Label scalingValue = new Label();
-
-
-            Label savedOriginLabel = new Label();
-            savedOriginLabel.Text = "Default Origin Folder:";
-            Label savedTargetLabel = new Label();
-            savedTargetLabel.Text = "Default Target Folder:";
-
-            Label title = new Label();
-            title.Text = "Default Values";
-
-            menu.SetBounds(20, 20, 400, 700);
-            menu.ClientSize = new System.Drawing.Size(800, 400);
-            menu.FormBorderStyle = FormBorderStyle.FixedDialog;
-            menu.StartPosition = FormStartPosition.CenterScreen;
-            menu.MinimizeBox = false;
-            menu.MaximizeBox = false;
-
-
-            title.SetBounds(20, 20, 160, 20);
-            scalingValue.Text = "Default Trim:";
-            scalingValue.SetBounds(20, 50, 160, 20);
-            savedXValue.Text = x.ToString();
-            savedXValue.SetBounds(115, 50, 100, 20);
-            xCrossValue.Text = "X";
-            xCrossValue.SetBounds(215, 50, 20, 20);
-            savedYValue.Text = y.ToString();
-            savedYValue.SetBounds(235, 50, 100, 20);
-            savedOrigin.SetBounds(200, 80, 600, 20);
-            savedOriginLabel.SetBounds(20, 80, 175, 20);
-            savedTarget.SetBounds(200, 110, 600, 20);
-            savedTargetLabel.SetBounds(20, 110, 175, 20);
-
-
-            Button save = new Button();
-            save.Text = "Save";
-            Button cancel = new Button();
-            cancel.Text = "Cancel";
-            save.DialogResult = DialogResult.OK;
-            cancel.DialogResult = DialogResult.Cancel;
-
-            save.SetBounds(250, 300, 160, 60);
-            cancel.SetBounds(410, 300, 160, 60);
-
-            menu.Controls.Add(savedXValue);
-            menu.Controls.Add(savedYValue);
-            menu.Controls.Add(savedOrigin);
-            menu.Controls.Add(savedTarget);
-            menu.Controls.Add(xCrossValue);
-            menu.Controls.Add(scalingValue);
-            menu.Controls.Add(title);
-            menu.Controls.Add(savedOriginLabel);
-            menu.Controls.Add(savedTargetLabel);
-            menu.Controls.Add(save);
-            menu.Controls.Add(cancel);
-            menu.AcceptButton = save;
-            menu.CancelButton = cancel;
-            DialogResult dialogResult = menu.ShowDialog();
-            try
-            {
-                x = int.Parse(savedXValue.Text);
-                y = int.Parse(savedYValue.Text);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.ToString(), "Error: Wrong value entered", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
-            origin = savedOrigin.Text;
-            target = savedTarget.Text;
+            frmSavedValues request = new frmSavedValues(x,y,input,output);
+            DialogResult dialogResult = request.savedValues(ref x, ref y, ref input, ref output);
             return dialogResult;
         }
+
         private void loadSettings()
         {
             string data = File.ReadAllText(savePath);
-
+            System.Diagnostics.Debug.WriteLine(data);
             if (data != "" && data != "{}")
             {
                 SaveData loadedData = JsonConvert.DeserializeObject<SaveData>(data);
-                txtOriginalSelectedPath.Text = loadedData.inputFolder;
-                txtTargetSelectedPath.Text = loadedData.outputFolder;
+                txtSelectedInputPath.Text = loadedData.inputFolder;
+                txtSelectedOutputPath.Text = loadedData.outputFolder;
                 defaultX = loadedData.x;
                 defaultY = loadedData.y;
                 this.clearListBox();
@@ -579,8 +409,7 @@ namespace HEICTransfer
 
                 // iterate over all files in the selected folder and add them to 
                 // the listbox.
-                foreach (string filename in Directory.GetFiles(loadedData.inputFolder))
-                    this.listBox1.Items.Add(filename);
+                listFiles(loadedData.inputFolder);
             }
 
         }
@@ -590,6 +419,7 @@ namespace HEICTransfer
             if(useDefault.Checked == true)
             {
                 useDefaults = true;
+                loadSettings();
             } else
             {
                 useDefaults = false;
@@ -602,7 +432,7 @@ namespace HEICTransfer
             public string inputFolder { get; set; }
             public int x { get; set; }
             public int y { get; set; }
-            public SaveData(string outputFolder, string inputFolder, int x, int y)
+            public SaveData(string inputFolder, string outputFolder, int x, int y)
             {
                 this.outputFolder = outputFolder;
                 this.inputFolder = inputFolder;
@@ -614,7 +444,51 @@ namespace HEICTransfer
 
         private void frmConvertHEICToJPG_Load(object sender, EventArgs e)
         {
+            loadSettings();
+            loadFileLoader();
+        }
 
+        private void listFiles(string filePath)
+        {
+            foreach (string filename in Directory.GetFiles(filePath))
+                this.listBox1.Items.Add(filename);
+        }
+
+        private void loadFileLoader()
+        {
+            this.folderBrowserDialog.RootFolder = System.Environment.SpecialFolder.MyComputer;
+            this.folderBrowserDialog.ShowNewFolderButton = false;
+        }
+
+        private void trim()
+        {
+            int x = -1;
+            int y = -1;
+            string tempInput;
+            string tempOutput;
+            if (useDefaults)
+            {
+                tempInput = txtSelectedInputPath.Text;
+                tempOutput = txtSelectedOutputPath.Text;
+                txtSelectedInputPath.Text = tempOutput;
+                txtSelectedOutputPath.Text = "";
+                TrimFiles(txtSelectedInputPath.Text, txtSelectedOutputPath.Text, defaultX, defaultY);
+                txtSelectedInputPath.Text = tempInput;
+                txtSelectedOutputPath.Text = tempOutput;
+            }
+            else
+            {
+                if (TrimBox("Trim", "Enter desired size", ref x, ref y) == DialogResult.OK)
+                {
+                    tempInput = txtSelectedInputPath.Text;
+                    tempOutput = txtSelectedOutputPath.Text;
+                    txtSelectedInputPath.Text = tempOutput;
+                    txtSelectedOutputPath.Text = "";
+                    TrimFiles(txtSelectedInputPath.Text, txtSelectedOutputPath.Text, x, y);
+                    txtSelectedInputPath.Text = tempInput;
+                    txtSelectedOutputPath.Text = tempOutput;
+                }
+            }
         }
     }
 }
