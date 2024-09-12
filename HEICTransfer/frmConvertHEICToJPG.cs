@@ -19,6 +19,7 @@ using System.Diagnostics;
 using System.Xml.Schema;
 using System.Reflection;
 using static HEICTransfer.frmConvertHEICToJPG;
+using System.Diagnostics.Eventing.Reader;
 
 namespace HEICTransfer
 {
@@ -26,29 +27,21 @@ namespace HEICTransfer
     {
         public frmConvertHEICToJPG()
         {
-            if (!File.Exists(Path.Combine(Application.StartupPath, "defaults.json")))
-            {
-                using (FileStream fs = File.Create(Path.Combine(Application.StartupPath, "defaults.json")))
-                {
-
-                }
-
-            }
+            string userFolder = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            appDataFolder = Path.Combine(userFolder, "HEICImageConverter");
+            savePath = Path.Combine(appDataFolder, "defaults.json");
             InitializeComponent();
+            AppDataSetup();
         }
-
+        string appDataFolder;
         string inputFolder = "";
         string outputFolder = "";
-        string defaultInput = "";
-        string defaultOutput = "";
-        int defaultX = 800;
-        int defaultY = 600;
-        Boolean useDefaults = true;
-        string savePath = Path.Combine(Application.StartupPath, "defaults.json");
+        string savePath;
+        SaveData saveData;
 
         private void btnSelectInputFolder_Click(object sender, EventArgs e)
         {
-            if (!useDefaults)
+            if (saveData.useDefaults == false)
             {
                 try
                 {
@@ -82,7 +75,7 @@ namespace HEICTransfer
 
         private void btnSelectOutputFolder_Click(object sender, EventArgs e)
         {
-            if (!useDefaults)
+            if (saveData.useDefaults == false)
             {
                 DialogResult result = this.folderBrowserDialog.ShowDialog();
                 if (result == DialogResult.OK)
@@ -161,6 +154,24 @@ namespace HEICTransfer
             trim();
         }
 
+        private void btnNonDefaultTrim_Click(object sender, EventArgs e)
+        {
+            if (txtSelectedInputPath.Text.Length != 0 && txtSelectedOutputPath.Text.Length != 0)
+            {
+                if (saveData.useDefaults)
+                {
+                    saveData.useDefaults = false;
+                    trim();
+                    saveData.useDefaults = true;
+                } else
+                {
+                    trim();
+                }
+            } else
+            {
+                MessageBox.Show("Please select defaults or disable the use defaults toggle", "Error", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+        }
         private void TrimFiles(string inputFolder, string outputFolder, int x, int y)
         {
             try
@@ -190,7 +201,7 @@ namespace HEICTransfer
                 }
 
 
-                else
+                else if(saveData.useDefaults == false) 
                 {
                     if (folderBrowserDialog.ShowDialog() == DialogResult.OK)
                     {
@@ -214,6 +225,8 @@ namespace HEICTransfer
 
                         MessageBox.Show("Trim complete!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
+                } else {
+                    MessageBox.Show("Please select defaults or disable the use defaults toggle", "Error", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
             }
             catch (Exception ex)
@@ -243,7 +256,7 @@ namespace HEICTransfer
                     MessageBox.Show("Conversion complete!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
                 }
-                else
+                else if(saveData.useDefaults == false)
                 {
 
                     if (folderBrowserDialog.ShowDialog() == DialogResult.OK)
@@ -263,6 +276,9 @@ namespace HEICTransfer
 
                         MessageBox.Show("Conversion complete!", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
+                } else
+                {
+                    MessageBox.Show("Please select defaults or disable the use defaults toggle", "Error", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
             }
             catch (Exception ex)
@@ -363,23 +379,18 @@ namespace HEICTransfer
                 output = loadedData.outputFolder;
                 x = loadedData.x;
                 y = loadedData.y;
-
-                defaultInput = loadedData.inputFolder;
-                defaultOutput = loadedData.outputFolder;
-                defaultX = loadedData.x;
-                defaultY = loadedData.y;
             }
 
             if (savedValues(ref x, ref y, ref input, ref output) == DialogResult.OK)
             {
-                SaveData saveData = new SaveData(input, output, x, y);
-                defaultInput = saveData.inputFolder;
-                defaultOutput = saveData.outputFolder;
-                defaultX = saveData.x;
-                defaultY = saveData.y;
+                saveData.inputFolder = input;
+                saveData.outputFolder = output;
+                saveData.x = x;
+                saveData.y = y;
+
                 string toWrite = JsonConvert.SerializeObject(saveData);
                 File.WriteAllText(savePath, toWrite);
-                if (useDefaults)
+                if (saveData.useDefaults)
                 {
                     loadSettings();
                 }
@@ -395,34 +406,39 @@ namespace HEICTransfer
         private void loadSettings()
         {
             string data = File.ReadAllText(savePath);
-            System.Diagnostics.Debug.WriteLine(data);
             if (data != "" && data != "{}")
             {
                 SaveData loadedData = JsonConvert.DeserializeObject<SaveData>(data);
-                txtSelectedInputPath.Text = loadedData.inputFolder;
-                txtSelectedOutputPath.Text = loadedData.outputFolder;
-                defaultX = loadedData.x;
-                defaultY = loadedData.y;
+                saveData.copyData(loadedData);
+                txtSelectedInputPath.Text = saveData.inputFolder;
+                txtSelectedOutputPath.Text = saveData.outputFolder;
                 this.clearListBox();
 
 
 
                 // iterate over all files in the selected folder and add them to 
                 // the listbox.
-                listFiles(loadedData.inputFolder);
-            }
-
+                if(inputFolder != "")
+                {
+                    listFiles(saveData.inputFolder);
+                }
+            } 
         }
 
         private void useDefault_CheckedChanged(object sender, EventArgs e)
         {
-            if(useDefault.Checked == true)
+            if(useDefault.Checked)
             {
-                useDefaults = true;
+                saveData.useDefaults = useDefault.Checked;
+                btnSelectInputFolder.Text = "Selecting a folder is disabled while using defaults";
+                btnSelectOutputFolder.Text = "Selecting a folder is disabled while using defaults";
                 loadSettings();
+                
             } else
             {
-                useDefaults = false;
+                saveData.useDefaults = useDefault.Checked;
+                btnSelectInputFolder.Text = "Select Original folder";
+                btnSelectOutputFolder.Text = "Select Target folder";
             }
         }
 
@@ -432,22 +448,41 @@ namespace HEICTransfer
             public string inputFolder { get; set; }
             public int x { get; set; }
             public int y { get; set; }
-            public SaveData(string inputFolder, string outputFolder, int x, int y)
+            public Boolean useDefaults { get; set; }
+            public SaveData(string inputFolder, string outputFolder, int x, int y, Boolean defaultsOn)
             {
                 this.outputFolder = outputFolder;
                 this.inputFolder = inputFolder;
                 this.x = x;
                 this.y = y;
+                this.useDefaults = defaultsOn;
+            }
 
+            public void copyData(SaveData loadedData)
+            {
+                this.outputFolder = loadedData.outputFolder;
+                this.inputFolder= loadedData.inputFolder;
+                this.x = loadedData.x;
+                this.y = loadedData.y;
             }
         }
 
         private void frmConvertHEICToJPG_Load(object sender, EventArgs e)
         {
-            loadSettings();
+            if (saveData.useDefaults)
+            {
+                loadSettings();
+            }
             loadFileLoader();
+            useDefault.Checked = saveData.useDefaults;
         }
 
+        private void frmConvertHEICToJPG_Closing(object sender, CancelEventArgs e)
+        {
+            string toWrite = JsonConvert.SerializeObject(saveData);
+            System.Diagnostics.Debug.WriteLine(toWrite);
+            File.WriteAllText(savePath, toWrite);
+        }
         private void listFiles(string filePath)
         {
             foreach (string filename in Directory.GetFiles(filePath))
@@ -466,13 +501,13 @@ namespace HEICTransfer
             int y = -1;
             string tempInput;
             string tempOutput;
-            if (useDefaults)
+            if (saveData.useDefaults)
             {
                 tempInput = txtSelectedInputPath.Text;
                 tempOutput = txtSelectedOutputPath.Text;
                 txtSelectedInputPath.Text = tempOutput;
                 txtSelectedOutputPath.Text = "";
-                TrimFiles(txtSelectedInputPath.Text, txtSelectedOutputPath.Text, defaultX, defaultY);
+                TrimFiles(txtSelectedInputPath.Text, txtSelectedOutputPath.Text, saveData.x, saveData.y);
                 txtSelectedInputPath.Text = tempInput;
                 txtSelectedOutputPath.Text = tempOutput;
             }
@@ -488,6 +523,23 @@ namespace HEICTransfer
                     txtSelectedInputPath.Text = tempInput;
                     txtSelectedOutputPath.Text = tempOutput;
                 }
+            }
+        }
+        private void AppDataSetup()
+        {
+            if(!Directory.Exists(appDataFolder))
+            {
+                Directory.CreateDirectory(appDataFolder);
+            }
+            if (!File.Exists(savePath))
+            {
+                saveData = new SaveData("", "", 800, 600, useDefault.Checked);
+                string toWrite = JsonConvert.SerializeObject(saveData);
+                File.WriteAllText(savePath, toWrite);
+            } else
+            {
+                string data = File.ReadAllText(savePath);
+                saveData = JsonConvert.DeserializeObject<SaveData>(data);
             }
         }
     }

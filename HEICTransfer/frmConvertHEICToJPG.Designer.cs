@@ -46,6 +46,7 @@ namespace HEICTransfer
             btnTrimConvert = new System.Windows.Forms.Button();
             btnSavedValues = new System.Windows.Forms.Button();
             useDefault = new System.Windows.Forms.CheckBox();
+            btnNonDefaultTrim = new System.Windows.Forms.Button();
             groupBox1.SuspendLayout();
             SuspendLayout();
             // 
@@ -150,7 +151,7 @@ namespace HEICTransfer
             btnTrim.Location = new System.Drawing.Point(10, 413);
             btnTrim.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             btnTrim.Name = "btnTrim";
-            btnTrim.Size = new System.Drawing.Size(880, 33);
+            btnTrim.Size = new System.Drawing.Size(440, 33);
             btnTrim.TabIndex = 11;
             btnTrim.Text = "Trim Target Folder";
             btnTrim.UseVisualStyleBackColor = false;
@@ -190,8 +191,20 @@ namespace HEICTransfer
             useDefault.Size = new System.Drawing.Size(122, 27);
             useDefault.Appearance = Appearance.Button;
             useDefault.ThreeState = false;
-            useDefault.Checked = true;
+            useDefault.Checked = false;
             useDefault.CheckedChanged += useDefault_CheckedChanged;
+            //
+            // btnNonDefaultTrim
+            //
+            btnNonDefaultTrim.BackColor = System.Drawing.Color.SkyBlue;
+            btnNonDefaultTrim.Location = new System.Drawing.Point(450, 413);
+            btnNonDefaultTrim.Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
+            btnNonDefaultTrim.Name = "btnNonDefaultTrim";
+            btnNonDefaultTrim.Size = new System.Drawing.Size(440, 33);
+            btnNonDefaultTrim.TabIndex = 11;
+            btnNonDefaultTrim.Text = "Non Default Trim";
+            btnNonDefaultTrim.UseVisualStyleBackColor = false;
+            btnNonDefaultTrim.Click += btnNonDefaultTrim_Click;
             // 
             // frmConvertHEICToJPG
             // 
@@ -208,11 +221,13 @@ namespace HEICTransfer
             Controls.Add(btnSavedValues);
             Controls.Add(useDefault);
             Controls.Add(groupBox1);
+            Controls.Add(btnNonDefaultTrim);
             Icon = (System.Drawing.Icon)resources.GetObject("$this.Icon");
             Margin = new System.Windows.Forms.Padding(3, 4, 3, 4);
             Name = "frmConvertHEICToJPG";
             Text = "Convert HEIC To JPG";
             Load += frmConvertHEICToJPG_Load;
+            FormClosing += frmConvertHEICToJPG_Closing;
             groupBox1.ResumeLayout(false);
             groupBox1.PerformLayout();
             ResumeLayout(false);
@@ -234,6 +249,7 @@ namespace HEICTransfer
         private System.Windows.Forms.Button btnTrimConvert;
         private System.Windows.Forms.Button btnSavedValues;
         private System.Windows.Forms.CheckBox useDefault;
+        private System.Windows.Forms.Button btnNonDefaultTrim;
     }
 }
 
